@@ -3,7 +3,6 @@ from binance.client import Client
 from datetime import datetime, timedelta
 
 def get_binance_data(symbol: str, timeframe: str, lookback_days: int = 30) -> pd.DataFrame:
-    """Download historical data from Binance."""
     client = Client()
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(days=lookback_days)
@@ -26,7 +25,6 @@ def get_binance_data(symbol: str, timeframe: str, lookback_days: int = 30) -> pd
     return data[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
 
 def compute_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
-    """Compute the Relative Strength Index (RSI)."""
     price_diff = data['close'].diff()
     gains = price_diff.where(price_diff > 0, 0).rolling(window=period).mean()
     losses = -price_diff.where(price_diff < 0, 0).rolling(window=period).mean()
@@ -34,11 +32,9 @@ def compute_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
     return 100 - (100 / (1 + rs))
 
 def compute_sma(data: pd.DataFrame, period: int) -> pd.Series:
-    """Compute the Simple Moving Average (SMA)."""
     return data['close'].rolling(window=period).mean()
 
 def compute_bollinger_bands(data: pd.DataFrame, period: int = 20) -> pd.DataFrame:
-    """Compute Bollinger Bands."""
     sma = compute_sma(data, period)
     std_dev = data['close'].rolling(window=period).std()
     upper_band = sma + (std_dev * 2)
@@ -46,7 +42,6 @@ def compute_bollinger_bands(data: pd.DataFrame, period: int = 20) -> pd.DataFram
     return pd.DataFrame({'lower_band': lower_band, 'middle_band': sma, 'upper_band': upper_band})
 
 def compute_atr(data: pd.DataFrame, period: int = 14) -> pd.Series:
-    """Compute the Average True Range (ATR)."""
     range_high_low = data['high'] - data['low']
     range_high_close = (data['high'] - data['close'].shift()).abs()
     range_low_close = (data['low'] - data['close'].shift()).abs()
@@ -54,7 +49,6 @@ def compute_atr(data: pd.DataFrame, period: int = 14) -> pd.Series:
     return true_range.rolling(window=period).mean()
 
 def enrich_data_with_indicators(data: pd.DataFrame) -> pd.DataFrame:
-    """Add technical indicators to the DataFrame."""
     data['RSI'] = compute_rsi(data)
     data['SMA_50'] = compute_sma(data, 50)
     data['SMA_200'] = compute_sma(data, 200)
@@ -64,7 +58,6 @@ def enrich_data_with_indicators(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 def export_to_csv(data: pd.DataFrame, filename: str) -> None:
-    """Export the DataFrame to a CSV file."""
     data.to_csv(filename, index=False)
     print(f"Data has been saved to {filename}")
 
